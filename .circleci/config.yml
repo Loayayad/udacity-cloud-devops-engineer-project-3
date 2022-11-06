@@ -41,8 +41,10 @@ commands:
   revert-migrations:
     description: Revert the last migration
     parameters:
-        workflow_id:
-          type: string      
+      when:
+        type: string
+      id:
+        type: string     
     steps:
       - run:
            name: Revert migrations
@@ -451,6 +453,12 @@ jobs:
             cd .circleci/ansible
             echo "Contents of the inventory.txt file is ------$(cat inventory.txt)"
             ansible-playbook -i inventory.txt deploy-server.yaml
+      - destroy_environment:
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
+          when: on_fail
+      - revert-migrations:
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
+          when: on_fail    
       #     working_directory: /tmp
       #     command: |
       #       apk add --update ansible curl rsync openssh nodejs npm
@@ -463,12 +471,7 @@ jobs:
       #     command: |
       #       cat inventory
       #       ansible-playbook -i inventory deploy-server.yaml -vv
-      - destroy_environment:
-          id: ${CIRCLE_WORKFLOW_ID:0:7}
-          when: on_fail
-      - revert-migrations:
-          id: ${CIRCLE_WORKFLOW_ID:0:7}
-          when: on_fail
+
 
 
   smoke-test:
