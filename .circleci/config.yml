@@ -640,7 +640,7 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - main
       - add-prometheus-node-exporter:
           requires: [deploy-infrastructure]          
       - configure-infrastructure:
@@ -656,7 +656,7 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - main
       - deploy-backend:
           requires:
             - run-migrations
