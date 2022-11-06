@@ -38,23 +38,25 @@ commands:
               TERM: xterm-256color
           when: << parameters.when >>
 
-  revert_migrations:
-    description: Revert the last migration if successfully run in the current workflow.
-    parameters:
-      when:
-        type: string
-      id:
-        type: string
-    steps:
-      - run:
-          name: Revert migrations
-          working_directory: ./backend
-          when: on_fail
-          command: |
-            cd ~/project/backend
-            npm install
-            npm run build
-            npm run migrations:revert
+revert-migrations:
+description: Revert the last migration
+parameters:
+    workflow_id:
+        type: string      
+steps:
+    - run:
+        name: Revert migrations
+        when: on_fail
+        command: |
+            
+            SUCCESS=$(curl --insecure  https://kvdb.io/AvCNFduHzfpm2xT8u6dZEL/migration_<< parameters.workflow_id >>)
+            
+            if (( $SUCCESS == 1 ));
+            then
+                cd ~/project/backend
+                npm install
+                npm run migration:revert
+            fi  
 
 jobs:
 
@@ -503,9 +505,9 @@ jobs:
             echo ${URL}
             if curl -s ${URL} | grep -q "Welcome"
             then
-              return 0
+              return 1
             else
-              return 0
+              return 1
             fi
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
